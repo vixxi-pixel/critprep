@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CritiCall Practice Tests</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a18;padding:20px;font-size:16px}
+.app{max-width:700px;margin:0 auto}
+h1{font-size:22px;font-weight:500;margin-bottom:4px}
+.subtitle{font-size:14px;color:#666;margin-bottom:1.25rem}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.toggle{position:relative;display:inline-block;width:36px;height:20px}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:10px;transition:.2s}
+.slider:before{position:absolute;content:"";height:14px;width:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+input:checked+.slider{background:#4a8c1c}
+input:checked+.slider:before{transform:translateX(16px)}
+.toggle-label{font-size:13px;color:#555}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:500;margin-left:6px;background:#faeeda;color:#854f0b}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.tab{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;color:#555;transition:all .15s}
+.tab.active{background:#f0f0ee;color:#111;border-color:#bbb;font-weight:500}
+.tab:hover:not(.active){background:#f5f5f3}
+.progress{width:100%;height:3px;background:#ddd;border-radius:2px;margin-bottom:1.25rem}
+.progress-fill{height:100%;background:#888;border-radius:2px;transition:width .3s}
+.timer-bar{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.timer-display{font-size:20px;font-weight:500;color:#111;min-width:44px}
+.timer-display.low{color:#c0392b}
+.timer-track{flex:1;height:4px;background:#ddd;border-radius:2px;overflow:hidden}
+.timer-fill{height:100%;background:#888;border-radius:2px;transition:width .9s linear}
+.timer-fill.low{background:#c0392b}
+.qcard{background:#fff;border:1px solid #e8e8e6;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.qlabel{font-size:11px;font-weight:500;letter-spacing:.06em;color:#999;text-transform:uppercase;margin-bottom:8px}
+.qtext{font-size:15px;color:#111;line-height:1.65;margin-bottom:1rem}
+.qbox{background:#f5f5f3;border-radius:8px;padding:12px 14px;margin-bottom:1rem;font-size:13.5px;line-height:1.75;color:#111;border-left:3px solid #ccc;white-space:pre-line}
+.qbox.hot{border-left-color:#c0392b}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid #e8e8e6;cursor:pointer;transition:all .15s;background:#fff;text-align:left;width:100%;color:#111;font-size:14px;line-height:1.5}
+.opt:hover:not(:disabled){border-color:#bbb;background:#f5f5f3}
+.opt.ok{border-color:#4a8c1c;background:#eaf3de;color:#2d5a0e}
+.opt.bad{border-color:#a32d2d;background:#fcebeb;color:#a32d2d}
+.ol{font-weight:500;min-width:18px;font-size:12px;opacity:.5}
+.fb{font-size:13px;margin-top:10px;padding:10px 14px;border-radius:8px;line-height:1.55}
+.fb.ok{background:#eaf3de;color:#2d5a0e;border:1px solid #b8dba0}
+.fb.bad{background:#fcebeb;color:#a32d2d;border:1px solid #f7c1c1}
+.navrow{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;gap:8px}
+.scorebar{font-size:13px;color:#666}
+.btn{font-size:13px;padding:7px 14px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;color:#111;transition:all .15s}
+.btn:hover:not(:disabled){background:#f0f0ee}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.pri{background:#1a1a18;color:#fff;border-color:transparent}
+.btn.pri:hover{opacity:.82}
+.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.char-label{font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:#999;margin-bottom:6px}
+.char-card{background:#f5f5f3;border-radius:8px;padding:12px 14px;font-size:13px;font-family:'Courier New',monospace;line-height:1.75;color:#111}
+.de-input{width:100%;font-size:14px;padding:8px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111;margin-bottom:2px}
+.de-input:focus{outline:none;border-color:#888}
+.de-input.ok{border-color:#4a8c1c;background:#eaf3de;color:#2d5a0e}
+.de-input.bad{border-color:#a32d2d;background:#fcebeb;color:#a32d2d}
+.callout{font-size:12px;color:#999;font-style:italic;margin-bottom:.75rem}
+.summary-big{background:#f5f5f3;border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:1.5rem}
+.summary-num{font-size:52px;font-weight:500;color:#111;line-height:1}
+.summary-msg{font-size:14px;color:#666;margin-top:6px}
+.mod-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>CritiCall Practice Tests</h1>
+<p class="subtitle" id="subt">6 modules — 0 questions answered</p>
+
+<div class="toggle-row">
+  <label class="toggle"><input type="checkbox" id="timed-toggle" onchange="toggleTimed()"><span class="slider"></span></label>
+  <span class="toggle-label">Timed mode <span class="badge">30s per question</span></span>
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="progress"><div class="progress-fill" id="prog"></div></div>
+<div id="timer-area"></div>
+<div id="quiz-area"></div>
+<div class="navrow">
+  <div class="scorebar" id="scorebar"></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn" id="prev-btn" onclick="navigate(-1)">← Prev</button>
+    <button class="btn" id="next-btn" onclick="navigate(1)">Next →</button>
+    <button class="btn pri" id="done-btn" onclick="showSummary()">Finish</button>
+  </div>
+</div>
+</div>
+
+<script>
+const TIMED_SECS = 30;
+let timerInterval = null;
+let timeLeft = TIMED_SECS;
+let timedMode = false;
+
+const modules = {
+  "prioritization": {
+    label:"Call Prioritization",
+    questions:[
+      {p:"Three calls come in simultaneously. Which should be dispatched first?",
+       box:"A) Car keyed in a parking lot — happened 2 hours ago.\nB) Caller smells burning and hears smoke alarm in neighbour's apartment.\nC) Dog barking for three hours.",
+       choices:["A — property crime priority","B — active fire/smoke hazard","C — noise complaint, public safety","Dispatch all three at once"],ans:1,
+       expl:"An active fire hazard (smoke + alarm) is a life-safety emergency — dispatched first over property crimes or noise."},
+      {p:"Caller: 'My husband collapsed and isn't breathing. He's turning blue.'",
+       choices:["Dispatch fire only","Dispatch EMS only, give CPR instructions","Dispatch EMS and fire, give CPR instructions now","Ask caller to confirm he's still unconscious first"],ans:2,
+       expl:"Cardiac arrest requires EMS + fire. CPR instructions begin immediately — every second without compressions reduces survival odds."},
+      {p:"Which call type is Priority 1 (immediate life threat)?",
+       choices:["Noise complaint from a bar at 11pm","Stolen bicycle — owner reporting after the fact","Person unconscious and unresponsive in a park","Traffic light out on a side street"],ans:2,
+       expl:"Unconscious/unresponsive person = immediate life threat = Priority 1."},
+      {p:"Caller: 'There's a man outside with a knife. Just standing there staring at my house. He hasn't done anything yet.'",
+       choices:["Wait for escalation before dispatching","Log call, advise caller to lock doors","Dispatch police immediately — imminent threat","Tell caller to go ask him to leave"],ans:2,
+       expl:"Armed individual exhibiting threatening behaviour is an imminent threat regardless of whether a crime has been committed."},
+      {p:"A child calls crying: 'Mommy fell and won't wake up.' Cannot provide an address.",
+       choices:["Hang up, wait for adult to call back","Keep child on line, use ANI/ALI, dispatch EMS immediately","Ask child to find a neighbour","Tell child to try waking mom and call back"],ans:1,
+       expl:"Never hang up. Use ANI/ALI to trace the location. Dispatch EMS and stay with the child on the line."},
+      {p:"A structure fire call comes in. While taking it, a second caller reports a cardiac arrest two blocks away. What do you do?",
+       choices:["Finish fire call first, then cardiac arrest","Transfer fire call, handle cardiac yourself","Dispatch fire units for the building AND EMS for the cardiac simultaneously","Ask supervisor to handle one call"],ans:2,
+       expl:"Both are Priority 1. A trained dispatcher handles both simultaneously — dispatch fire units for the building fire while EMS is dispatched for the cardiac arrest."},
+      {p:"A caller says 'I think I left the stove on at home, can you send someone to check?'",
+       choices:["Dispatch fire immediately","Direct caller to non-emergency line","Log as Priority 1","Transfer to police"],ans:1,
+       expl:"A stove potentially left on is not an active emergency. Direct to the non-emergency line or advise to contact a neighbour/building manager."},
+      {p:"Which factor most directly determines dispatch priority?",
+       choices:["Time the call was received","Tone of the caller's voice","Nature and immediacy of the threat to life or property","Number of people involved"],ans:2,
+       expl:"Dispatch priority is determined by the nature and immediacy of the threat. A quiet caller can still be reporting a life-threatening emergency."}
+    ]
+  },
+  "memory": {
+    label:"Memory Recall",
+    questions:[
+      {p:"Read this call log carefully. It will be hidden when questions appear.",
+       box:"CALL LOG #2241 — 14:32\nCaller: Margaret Osei, DOB: 1961-03-14\nLocation: 47 Birchwood Crescent, Unit 9\nNature: Gas smell in basement\nCaller phone: (416) 882-0347\nUnit assigned: Fire Station 6, Engine 3\nNotes: Smell started approx. 30 min ago. Back door left open.",
+       isMemory:true,
+       sub:[
+         {q:"What unit number was the caller in?",choices:["Unit 6","Unit 9","Unit 3","Unit 47"],ans:1,expl:"Unit 9, at 47 Birchwood Crescent."},
+         {q:"What was the caller's phone number?",choices:["(416) 828-0347","(416) 882-0347","(416) 882-3047","(416) 882-0437"],ans:1,expl:"(416) 882-0347."},
+         {q:"Which fire station was assigned?",choices:["Station 3","Station 9","Station 6","Station 2"],ans:2,expl:"Fire Station 6, Engine 3."},
+         {q:"What was the caller's date of birth?",choices:["1961-04-14","1916-03-14","1961-03-14","1961-03-04"],ans:2,expl:"1961-03-14."}
+       ]
+      },
+      {p:"Study this incident summary. It will be hidden for questions.",
+       box:"INCIDENT #5503 — 09:17\nReporting party: David Ng, male, approx. 40 yrs\nVehicle: 2019 silver Honda Civic, plate: BRTX 441\nLocation: Intersection of King St W and Bathurst\nIncident: Minor collision, no injuries\nOther party: Jane Kowalski, (647) 334-9201\nOfficer dispatched: Badge #1122",
+       isMemory:true,
+       sub:[
+         {q:"What was the licence plate?",choices:["BRTX 414","BRTX 441","BRTK 441","BRTX 411"],ans:1,expl:"BRTX 441."},
+         {q:"What was the officer's badge number?",choices:["1221","1212","1122","2211"],ans:2,expl:"Badge #1122."},
+         {q:"What was the other party's phone number?",choices:["(647) 334-9210","(647) 433-9201","(647) 334-9201","(674) 334-9201"],ans:2,expl:"(647) 334-9201."},
+         {q:"What colour was the vehicle?",choices:["White","Blue","Black","Silver"],ans:3,expl:"2019 silver Honda Civic."}
+       ]
+      },
+      {p:"Read this missing persons report carefully.",
+       box:"MISSING PERSON REPORT — 18:44\nReported by: Sylvia Tan, relationship: aunt\nMissing: Kevin Tan, male, age 8\nLast seen: Rosedale Park, near the east entrance\nLast wearing: red hoodie, navy blue shorts, white sneakers\nHair: black, short. Height approx. 4'2\"\nCase #: MP-2024-0089\nNotes: Kevin has autism and does not speak verbally.",
+       isMemory:true,
+       sub:[
+         {q:"What was Kevin last wearing on top?",choices:["Blue jacket","Red hoodie","White shirt","Navy sweater"],ans:1,expl:"Red hoodie."},
+         {q:"What is Kevin's case number?",choices:["MP-2024-0098","MP-2024-0089","MP-2024-0809","MP-2024-0980"],ans:1,expl:"MP-2024-0089."},
+         {q:"Where was Kevin last seen?",choices:["West entrance of Rosedale Park","East entrance of Rosedale Park","Corner of Rosedale Ave","Inside the park near the fountain"],ans:1,expl:"Near the east entrance of Rosedale Park."},
+         {q:"What important note was included about Kevin?",choices:["He has a peanut allergy","He is autistic and does not speak verbally","He is hard of hearing","He uses a wheelchair"],ans:1,expl:"Kevin has autism and does not speak verbally — critical for responding officers."}
+       ]
+      }
+    ]
+  },
+  "math": {
+    label:"Math & Probability",
+    questions:[
+      {p:"Dispatch Centre A handles 240 calls per day. 3 out of every 8 are Priority 1. How many Priority 1 calls per day?",
+       choices:["80","90","96","100"],ans:1,expl:"3/8 × 240 = 90."},
+      {p:"A dispatcher works 6 hours, handling a call every 4 minutes on average. How many calls total?",
+       choices:["80","90","84","96"],ans:1,expl:"6 hours = 360 min. 360 ÷ 4 = 90."},
+      {p:"1 in 5 emergency calls requires an ambulance. 75 calls came in today. How many required an ambulance?",
+       choices:["12","15","18","20"],ans:1,expl:"1/5 × 75 = 15."},
+      {p:"A response team was dispatched at 14:31 and arrived at 14:47. What was the response time?",
+       choices:["14 min","16 min","18 min","12 min"],ans:1,expl:"14:47 − 14:31 = 16 minutes."},
+      {p:"Daily calls over 5 days: 210, 195, 230, 205, 210. What is the daily average?",
+       choices:["208","210","212","206"],ans:1,expl:"(210+195+230+205+210) ÷ 5 = 1050 ÷ 5 = 210."},
+      {p:"A dispatcher correctly transcribes 95% of call data. In 200 calls, how many entries contain errors?",
+       choices:["5","10","15","20"],ans:1,expl:"200 × 0.05 = 10 errors."},
+      {p:"Unit A arrives in 8 min, Unit B in 12 min, Unit C in 6 min. How many minutes ahead of the slowest does the fastest arrive?",
+       choices:["Unit A, 4 min ahead","Unit B, 2 min ahead","Unit C, 6 min ahead","Unit C, 4 min ahead"],ans:3,expl:"Unit C at 6 min is fastest. Slowest is Unit B at 12 min. 12 − 6 = 6 minutes ahead."},
+      {p:"2 out of 7 calls involve a vehicle. What is the probability as a percentage (round to nearest whole number)?",
+       choices:["24%","27%","29%","31%"],ans:2,expl:"2 ÷ 7 = 0.2857 ≈ 29%."},
+      {p:"A call centre receives 420 calls Monday, 390 Tuesday, 450 Wednesday. What is the 3-day total?",
+       choices:["1,230","1,260","1,240","1,270"],ans:1,expl:"420 + 390 + 450 = 1,260."},
+      {p:"Shift A handles 35%, Shift B 45%, Shift C the rest. 400 total calls. How many does Shift C handle?",
+       choices:["70","80","75","85"],ans:1,expl:"100% − 35% − 45% = 20%. 0.20 × 400 = 80."}
+    ]
+  },
+  "reading": {
+    label:"Reading Comprehension",
+    questions:[
+      {p:"Read the policy excerpt and answer the questions.",
+       box:"DISPATCH POLICY 4.3.2: When a caller reports a domestic disturbance, regardless of whether violence has occurred, two officers must be dispatched. If weapons are mentioned or suspected, a supervisor must be notified before dispatch. Officers should not enter premises without backup unless an active injury is confirmed.",
+       isMemory:true,
+       sub:[
+         {q:"A caller reports a loud argument and mentions her husband has a bat. What is correct procedure?",
+          choices:["Dispatch one officer immediately","Dispatch two officers, no other steps","Notify supervisor before dispatching two officers","Wait for caller to confirm injury"],ans:2,
+          expl:"Weapon mentioned → notify supervisor before dispatch. Always dispatch two for domestic calls."},
+         {q:"When can officers enter premises without backup?",
+          choices:["When caller is crying","When weapons are suspected","When an active injury is confirmed","Never"],ans:2,
+          expl:"Policy 4.3.2 states the one exception is confirmed active injury."}
+       ]
+      },
+      {p:"Read the call summary and answer the questions.",
+       box:"At 22:14, Priya Singh reported a break-in at 338 Elmview Drive. She could hear someone in her garage. She was whispering and had locked herself in an upstairs bedroom. She didn't believe the intruder knew she was home. She refused to stay on the line but gave her cell: (905) 441-7823.",
+       isMemory:true,
+       sub:[
+         {q:"Where was Priya when she called?",choices:["In the garage","In the kitchen","Locked in an upstairs bedroom","Outside"],ans:2,expl:"Locked in an upstairs bedroom."},
+         {q:"What made this call particularly challenging?",choices:["Caller spoke too fast","Caller refused to stay on line","Caller didn't give a phone number","Address was unclear"],ans:1,expl:"She refused to stay on the line, limiting the dispatcher's ability to provide updates or guidance."}
+       ]
+      },
+      {p:"Read the policy and answer the questions.",
+       box:"POLICY 7.1: All callers reporting a mental health crisis must be kept on the line until a mobile crisis unit or police unit is confirmed en route. If the caller is suicidal, a police unit must always be co-dispatched with any mental health response. Dispatchers are not to give clinical advice but may use approved de-escalation language.",
+       isMemory:true,
+       sub:[
+         {q:"A caller reports a suicidal person in crisis. What must be dispatched?",
+          choices:["Mental health unit only","Police only","Both mental health unit and police","Supervisor to handle the call"],ans:2,
+          expl:"Suicidal caller requires both a mental health response and police co-dispatch per Policy 7.1."},
+         {q:"What should a dispatcher NOT do on a mental health crisis call?",
+          choices:["Keep caller on line","Use approved de-escalation language","Give clinical advice","Dispatch a mobile crisis unit"],ans:2,
+          expl:"Dispatchers may not give clinical advice — only approved de-escalation language."}
+       ]
+      },
+      {p:"Read the following call log excerpt and answer the questions.",
+       box:"CALL #8812 — 11:03\nCaller: Anonymous male, refused to give name\nNature: Suspicious vehicle parked outside a school for 2 hours\nVehicle: Dark green SUV, partial plate: 'R7'\nLocation: 220 Elm Ave, outside Westview Elementary\nNotes: Caller stated a man in the vehicle appeared to be watching children at recess.",
+       isMemory:true,
+       sub:[
+         {q:"Why is this call elevated priority despite no confirmed crime?",
+          choices:["The caller was anonymous","A vehicle has been parked for 2 hours","Potential surveillance of children — child safety threat","The plate was only partially captured"],ans:2,
+          expl:"Potential surveillance of children at a school is an elevated child safety risk requiring immediate police response."},
+         {q:"What vehicle information was captured?",
+          choices:["Full plate, dark green SUV","Partial plate 'R7', dark green SUV","Full plate, black SUV","Partial plate 'R7', dark blue SUV"],ans:1,
+          expl:"Dark green SUV, partial plate R7 — as recorded in the call log."}
+       ]
+      }
+    ]
+  },
+  "character": {
+    label:"Character Checking",
+    questions:[
+      {p:"Compare the two records below. How many fields contain a discrepancy?",
+       isChar:true,
+       a:"Name: JENNIFER WALSH\nDOB: 1987-04-22\nPhone: (416) 553-8801\nAddress: 91 Maple Lane, Unit 3B\nCase #: CR-2024-1147",
+       b:"Name: JENNIFER WALSH\nDOB: 1987-04-22\nPhone: (416) 553-8810\nAddress: 91 Maple Lane, Unit 3B\nCase #: CR-2024-1174",
+       choices:["0 discrepancies","1 discrepancy","2 discrepancies","3 discrepancies"],ans:2,
+       expl:"Phone: 8801 vs 8810. Case #: 1147 vs 1174. Two discrepancies."},
+      {p:"Compare these two entries. How many discrepancies exist?",
+       isChar:true,
+       a:"Plate: KRTX 228\nMake: 2020 Ford F-150\nColour: Dark Grey\nOwner: Marcus Bell\nLic. Expiry: 2025-06-30",
+       b:"Plate: KRTX 228\nMake: 2020 Ford F-150\nColour: Dark Gray\nOwner: Marcus Bell\nLic. Expiry: 2025-06-03",
+       choices:["0","1","2","3"],ans:2,
+       expl:"Colour: Grey vs Gray. Expiry: 06-30 vs 06-03. Two discrepancies."},
+      {p:"Which entry exactly matches the reference?\nReference: Badge #4471 — Officer T. Ramos — Precinct 12 — On Duty since 07:00",
+       choices:[
+         "Badge #4471 — Officer T. Ramos — Precinct 12 — On Duty since 07:00",
+         "Badge #4471 — Officer T. Ramos — Precinct 21 — On Duty since 07:00",
+         "Badge #4471 — Officer T. Ramos — Precinct 12 — On Duty since 07:30",
+         "Badge #4471 — Officer T. Ramos — Precint 12 — On Duty since 07:00"
+       ],ans:0,
+       expl:"Option A exactly matches. B has Precinct 21 (wrong), C has 07:30 (wrong), D has 'Precint' (misspelled)."},
+      {p:"Compare these two records. How many fields differ?",
+       isChar:true,
+       a:"Incident: INC-5502\nDate: 2024-11-08\nLocation: 14 Brook St\nOfficer: Badge #2209\nStatus: Open",
+       b:"Incident: INC-5502\nDate: 2024-11-08\nLocation: 14 Brook St\nOfficer: Badge #2290\nStatus: Closed",
+       choices:["0","1","2","3"],ans:2,
+       expl:"Officer: Badge #2209 vs #2290. Status: Open vs Closed. Two differences."},
+      {p:"Compare the two address records. How many discrepancies exist?",
+       isChar:true,
+       a:"Property: 88 Oakfield Blvd, Unit 4C\nCity: Markham\nPostal: L3R 2W9\nOwner: Sunita Patel\nType: Residential",
+       b:"Property: 88 Oakfeild Blvd, Unit 4C\nCity: Markham\nPostal: L3R 2W9\nOwner: Sunita Patel\nType: Residential",
+       choices:["0","1","2","3"],ans:1,
+       expl:"One discrepancy: 'Oakfield' vs 'Oakfeild' — a spelling error that could delay emergency response."},
+      {p:"How many differences exist between these two call records?",
+       isChar:true,
+       a:"Caller: Ana Torres, (905) 887-2341\nCall time: 13:22\nAddress: 330 Yonge St\nPriority: 2\nUnits: EMS 14",
+       b:"Caller: Ana Torres, (905) 887-2431\nCall time: 13:22\nAddress: 330 Young St\nPriority: 2\nUnits: EMS 14",
+       choices:["1","2","3","4"],ans:1,
+       expl:"Phone: 2341 vs 2431. Address: Yonge vs Young. Two discrepancies."}
+    ]
+  },
+  "dataentry": {
+    label:"Data Entry",
+    questions:[
+      {p:"Enter the following call details into the fields exactly as shown — spelling, spacing, and punctuation count.",
+       isDataEntry:true,
+       box:"Caller name: Patricia Okafor\nPhone: (647) 229-4401\nAddress: 55 Harrington Ave\nIncident type: Medical\nCall time: 08:45",
+       fields:[
+         {label:"Caller name",key:"name",correct:"Patricia Okafor"},
+         {label:"Phone number",key:"phone",correct:"(647) 229-4401"},
+         {label:"Address",key:"addr",correct:"55 Harrington Ave"},
+         {label:"Incident type",key:"type",correct:"Medical"},
+         {label:"Call time",key:"time",correct:"08:45"}
+       ]
+      },
+      {p:"Transcribe the following vehicle information accurately.",
+       isDataEntry:true,
+       box:"Owner: Brendan Clarke\nVehicle: 2018 Red Toyota Camry\nPlate: FXTW 893\nInsurance exp: 2025-09-01\nDriver licence: C7842-09183",
+       fields:[
+         {label:"Owner name",key:"owner",correct:"Brendan Clarke"},
+         {label:"Plate number",key:"plate",correct:"FXTW 893"},
+         {label:"Insurance expiry",key:"ins",correct:"2025-09-01"},
+         {label:"Driver licence",key:"dl",correct:"C7842-09183"}
+       ]
+      },
+      {p:"Enter the missing persons report details below.",
+       isDataEntry:true,
+       box:"Missing person: Theo Marchand, male, age 14\nLast seen: 16:30, Centennial Park, north trail\nClothing: Grey hoodie, black joggers\nCase number: MP-2024-0312\nContact: (416) 774-0038",
+       fields:[
+         {label:"Full name",key:"name",correct:"Theo Marchand"},
+         {label:"Case number",key:"case",correct:"MP-2024-0312"},
+         {label:"Last seen location",key:"loc",correct:"Centennial Park, north trail"},
+         {label:"Contact number",key:"contact",correct:"(416) 774-0038"}
+       ]
+      }
+    ]
+  }
+};
+
+const modKeys = Object.keys(modules);
+let currentMod = modKeys[0];
+let state = {};
+let currentQ = 0;
+let currentSub = {};
+
+function initState() {
+  state = {};
+  modKeys.forEach(k => {
+    state[k] = modules[k].questions.map(q => {
+      if (q.isMemory || q.isChar || q.isDataEntry) {
+        const sc = q.sub ? q.sub.length : (q.fields ? q.fields.length : 2);
+        return { answered:false, subAnswers:Array(sc).fill(null).map(()=>({selected:null,answered:false})), deValues:{}, deSubmitted:false };
+      }
+      return { selected:null, answered:false };
+    });
+  });
+  currentSub = {};
+  modKeys.forEach(k => currentSub[k] = 0);
+}
+initState();
+
+function toggleTimed() {
+  timedMode = document.getElementById('timed-toggle').checked;
+  clearTimer();
+  if (timedMode) startTimer();
+  renderQuestion();
+}
+
+function startTimer() {
+  clearTimer();
+  timeLeft = TIMED_SECS;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) { clearTimer(); autoSkip(); }
+  }, 1000);
+}
+
+function clearTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function autoSkip() {
+  const q = modules[currentMod].questions[currentQ];
+  const s = state[currentMod][currentQ];
+  if (!q.isMemory && !q.isChar && !q.isDataEntry && !s.answered) {
+    s.answered = true; s.selected = -1;
+  }
+  renderQuestion();
+}
+
+function updateTimerUI() {
+  const area = document.getElementById('timer-area');
+  if (!timedMode) { area.innerHTML = ''; return; }
+  const pct = (timeLeft / TIMED_SECS) * 100;
+  const low = timeLeft <= 8;
+  area.innerHTML = `<div class="timer-bar">
+    <span class="timer-display${low?' low':''}">${timeLeft}s</span>
+    <div class="timer-track"><div class="timer-fill${low?' low':''}" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = modKeys.map(k =>
+    `<button class="tab${k===currentMod?' active':''}" onclick="switchMod('${k}')">${modules[k].label}</button>`
+  ).join('');
+}
+
+function switchMod(k) {
+  currentMod = k; currentQ = 0;
+  clearTimer(); if (timedMode) startTimer();
+  renderTabs(); renderQuestion();
+}
+
+function navigate(dir) {
+  const qs = modules[currentMod].questions;
+  currentQ = Math.max(0, Math.min(qs.length-1, currentQ+dir));
+  currentSub[currentMod] = 0;
+  clearTimer(); if (timedMode) startTimer();
+  renderQuestion();
+}
+
+function getTotalDone() {
+  let n = 0;
+  modKeys.forEach(k => {
+    modules[k].questions.forEach((q,i) => {
+      if (q.isDataEntry) { if (state[k][i].deSubmitted) n++; }
+      else if (q.isMemory || q.isChar) { if (q.sub) q.sub.forEach((_,j) => { if (state[k][i].subAnswers[j].answered) n++; }); }
+      else { if (state[k][i].answered) n++; }
+    });
+  });
+  return n;
+}
+
+function getScore(mod) {
+  let c=0,t=0;
+  modules[mod].questions.forEach((q,i) => {
+    const s = state[mod][i];
+    if (q.isDataEntry) {
+      t++; if (s.deSubmitted) { const ok = q.fields.every(f=>(s.deValues[f.key]||'').trim()===f.correct); if (ok) c++; }
+    } else if (q.isMemory || q.isChar) {
+      if (q.sub) q.sub.forEach((sub,j) => { t++; const a=s.subAnswers[j]; if (a.answered && a.selected===sub.ans) c++; });
+    } else { t++; if (s.answered && s.selected===q.ans) c++; }
+  });
+  return {c,t};
+}
+
+function renderScorebar() {
+  const {c,t} = getScore(currentMod);
+  document.getElementById('scorebar').textContent = `${c}/${t} correct in this module`;
+  document.getElementById('prog').style.width = ((currentQ/Math.max(1,modules[currentMod].questions.length-1))*100)+'%';
+  document.getElementById('subt').textContent = `6 modules — ${getTotalDone()} questions answered`;
+  document.getElementById('prev-btn').disabled = currentQ===0;
+  document.getElementById('next-btn').disabled = currentQ===modules[currentMod].questions.length-1;
+}
+
+function renderQuestion() {
+  const q = modules[currentMod].questions[currentQ];
+  const s = state[currentMod][currentQ];
+  const area = document.getElementById('quiz-area');
+  updateTimerUI();
+
+  let html = `<div class="qcard"><div class="qlabel">Q${currentQ+1} of ${modules[currentMod].questions.length} — ${modules[currentMod].label}</div><div class="qtext">${q.p}</div>`;
+
+  if (q.isDataEntry) {
+    if (q.box) html += `<div class="qbox">${q.box}</div>`;
+    q.fields.forEach(f => {
+      const val = s.deValues[f.key]||'';
+      let cls = '';
+      if (s.deSubmitted) cls = val.trim()===f.correct?' ok':' bad';
+      html += `<div style="margin-bottom:10px"><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">${f.label}</label>
+        <input class="de-input${cls}" id="de_${f.key}" value="${val.replace(/"/g,'&quot;')}" ${s.deSubmitted?'disabled':''} oninput="deInput('${f.key}',this.value)" placeholder="Type here..."></div>`;
+    });
+    if (!s.deSubmitted) html += `<button class="btn pri" style="margin-top:4px" onclick="submitDE()">Submit entries</button>`;
+    else {
+      const allOk = q.fields.every(f=>(s.deValues[f.key]||'').trim()===f.correct);
+      html += `<div class="fb ${allOk?'ok':'bad'}">${allOk?'✓ All fields correct!':'✗ Some fields had errors — check highlighted fields above.'}</div>`;
+      if (!allOk) {
+        html += `<div style="margin-top:8px;font-size:13px;color:#666">`;
+        q.fields.forEach(f => { if ((s.deValues[f.key]||'').trim()!==f.correct) html += `<div style="margin:3px 0">Correct for <strong>${f.label}</strong>: <code>${f.correct}</code></div>`; });
+        html += `</div>`;
+      }
+    }
+    html += `</div>`;
+    area.innerHTML = html; renderScorebar(); return;
+  }
+
+  if (q.isChar && q.a && q.b) {
+    html += `<div class="char-grid">
+      <div><div class="char-label">Record A</div><div class="char-card">${q.a}</div></div>
+      <div><div class="char-label">Record B</div><div class="char-card">${q.b}</div></div>
+    </div>`;
+  } else if (q.box) {
+    const hide = q.isMemory && (currentSub[currentMod]>0 || s.subAnswers[0].answered);
+    const hot = q.box.includes('not breathing')||q.box.includes('gas smell');
+    html += hide
+      ? `<div class="qbox" style="opacity:.35;font-style:italic">Record hidden — answer from memory.</div>`
+      : `<div class="qbox${hot?' hot':''}">${q.box}</div>`;
+  }
+
+  if ((q.isMemory && q.sub) || (q.sub && !q.isChar)) {
+    const si = currentSub[currentMod]||0;
+    if (si >= q.sub.length) { html += `<div style="padding:8px 0;color:#666;font-size:14px">All parts complete.</div>`; }
+    else {
+      const sub = q.sub[si]; const sa = s.subAnswers[si];
+      html += `<div class="qlabel" style="margin-top:4px">Part ${si+1} of ${q.sub.length}</div><div class="qtext">${sub.q}</div><div class="opts">`;
+      sub.choices.forEach((c,ci) => {
+        let cls=''; if (sa.answered) { if (ci===sub.ans) cls='ok'; else if (ci===sa.selected) cls='bad'; }
+        html += `<button class="opt ${cls}" onclick="answerSub(${si},${ci})" ${sa.answered?'disabled':''}><span class="ol">${'ABCD'[ci]}</span><span>${c}</span></button>`;
+      });
+      html += `</div>`;
+      if (sa.answered) {
+        const ok = sa.selected===sub.ans;
+        html += `<div class="fb ${ok?'ok':'bad'}">${ok?'✓ Correct':'✗ Incorrect'} — ${sub.expl}</div>`;
+        if (si < q.sub.length-1) html += `<button class="btn" style="margin-top:10px" onclick="nextSub()">Next part →</button>`;
+      }
+    }
+  } else {
+    html += `<div class="opts">`;
+    q.choices.forEach((c,ci) => {
+      let cls=''; if (s.answered) { if (ci===q.ans) cls='ok'; else if (ci===s.selected) cls='bad'; }
+      html += `<button class="opt ${cls}" onclick="answer(${ci})" ${s.answered?'disabled':''}><span class="ol">${'ABCD'[ci]}</span><span>${c}</span></button>`;
+    });
+    html += `</div>`;
+    if (s.answered) {
+      const ok = s.selected===q.ans;
+      html += `<div class="fb ${ok?'ok':'bad'}">${ok?'✓ Correct':'✗ Incorrect'} — ${q.expl}</div>`;
+    }
+  }
+
+  html += `</div>`;
+  area.innerHTML = html;
+  renderScorebar();
+}
+
+function deInput(key, val) { const s = state[currentMod][currentQ]; if (!s.deValues) s.deValues={}; s.deValues[key]=val; }
+function submitDE() { state[currentMod][currentQ].deSubmitted=true; clearTimer(); renderQuestion(); }
+function answer(ci) { const s=state[currentMod][currentQ]; if (s.answered) return; s.selected=ci; s.answered=true; clearTimer(); renderQuestion(); }
+function answerSub(si,ci) { const s=state[currentMod][currentQ]; if (s.subAnswers[si].answered) return; s.subAnswers[si].selected=ci; s.subAnswers[si].answered=true; if (si===0) s.answered=true; clearTimer(); renderQuestion(); }
+function nextSub() { currentSub[currentMod]=(currentSub[currentMod]||0)+1; if (timedMode) startTimer(); renderQuestion(); }
+
+function showSummary() {
+  clearTimer();
+  document.getElementById('timer-area').innerHTML='';
+  let gC=0,gT=0,rows='';
+  modKeys.forEach(mod => {
+    const {c,t}=getScore(mod); gC+=c; gT+=t;
+    const pct=t?Math.round(c/t*100):0;
+    rows += `<div class="mod-row"><span>${modules[mod].label}</span><span style="color:${pct>=70?'#4a8c1c':'#c0392b'};font-weight:500">${c}/${t} (${pct}%)</span></div>`;
+  });
+  const pct=gT?Math.round(gC/gT*100):0;
+  const msg=pct>=80?'Strong — you are test-ready.':pct>=60?'Good effort — review missed areas.':'Keep practising — focus on weak modules.';
+  document.getElementById('quiz-area').innerHTML = `<div class="summary-big"><div class="summary-num">${pct}%</div><div class="summary-msg">${gC} of ${gT} correct — ${msg}</div></div>
+  <div class="qcard">${rows}</div>
+  <div style="margin-top:1rem;text-align:center"><button class="btn pri" onclick="restart()">Restart all modules</button></div>`;
+  document.getElementById('scorebar').textContent='';
+  document.getElementById('prog').style.width='100%';
+  ['prev-btn','next-btn','done-btn'].forEach(id => document.getElementById(id).style.display='none');
+}
+
+function restart() {
+  initState(); currentQ=0; currentMod=modKeys[0];
+  clearTimer(); if (timedMode) startTimer();
+  ['prev-btn','next-btn','done-btn'].forEach(id => document.getElementById(id).style.display='');
+  renderTabs(); renderQuestion();
+}
+
+renderTabs(); renderQuestion();
+</script>
+</body>
+</html>
